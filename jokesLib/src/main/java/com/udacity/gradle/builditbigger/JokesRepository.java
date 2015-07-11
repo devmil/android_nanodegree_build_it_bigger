@@ -6,7 +6,6 @@ import com.udacity.gradle.builditbigger.entities.JokeDatabase;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Random;
 
 public final class JokesRepository {
 
