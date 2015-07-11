@@ -12,7 +12,8 @@ import android.widget.TextView;
  */
 public class JokeActivityFragment extends Fragment {
 
-    private TextView txtJoke;
+    private TextView txtJokeTitle;
+    private TextView txtJokeContent;
 
     public JokeActivityFragment() {
     }
@@ -22,12 +23,14 @@ public class JokeActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View result = inflater.inflate(R.layout.fragment_joke, container, false);
 
-        txtJoke = (TextView)result.findViewById(R.id.fragment_joke_text);
+        txtJokeTitle = (TextView)result.findViewById(R.id.fragment_joke_txt_title);
+        txtJokeContent = (TextView)result.findViewById(R.id.fragment_joke_txt_content);
 
         return result;
     }
 
-    public void setJoke(String joke) {
-        txtJoke.setText(joke);
+    public void setJoke(String jokeTitle, String jokeContent) {
+        txtJokeTitle.setText(jokeTitle);
+        txtJokeContent.setText(jokeContent);
     }
 }
