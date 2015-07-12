@@ -2,7 +2,6 @@
     <string name="app_name">Build it Bigger</string>
     <string name="instructions">Press the button for a delicious joke!</string>
     <string name="button_text">Tell Joke</string>
-    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
     <string name="error_connection">Problems connecting to the internet. Please check your connection.</string>
     <string name="error_bad_format">Problems while parsing the result. Please make sure you have updated to the latest version of BuildItBigger!</string>
     <string name="error_unknown">Unknown problem</string>

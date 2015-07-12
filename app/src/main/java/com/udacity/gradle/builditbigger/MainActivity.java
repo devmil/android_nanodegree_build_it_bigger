@@ -1,21 +1,18 @@
 package com.udacity.gradle.builditbigger;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import com.udacity.gradle.builditbigger.jokespresentation.JokeActivity;
 
 
 public class MainActivity extends AppCompatActivity implements JokesClientListener {
 
     private JokesClient mClient;
     private LinearLayout llProgress;
-    private ProgressBar progress;
+
+    private ShowJokeBehavior mShowBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,21 +20,25 @@ public class MainActivity extends AppCompatActivity implements JokesClientListen
         setContentView(R.layout.activity_main);
 
         llProgress = (LinearLayout)findViewById(R.id.activity_main_llProgress);
-        progress = (ProgressBar)findViewById(R.id.activity_main_progress);
 
         mClient = new JokesClient(this);
         mClient.setListener(this);
-    }
 
+        mShowBehavior = ShowJokeBehaviorFactory.createBehavior(this);
+    }
 
     public void tellJoke(View view){
         mClient.requestNewJoke();
     }
 
     @Override
-    public void onNewJokeReceived(JokesClientResponse response) {
-        Intent launchActivityIntent = JokeActivity.createLaunchIntent(this, response.getTitle(), response.getContent());
-        startActivity(launchActivityIntent);
+    public void onNewJokeReceived(final JokesClientResponse response) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mShowBehavior.showJoke(response.getTitle(), response.getContent());
+            }
+        });
     }
 
     @Override
