@@ -17,3 +17,11 @@ allprojects {
         jcenter()
     }
 }
+
+task testWithAppEngine {
+    group 'udacity'
+    dependsOn ':jokesBackend:appengineRun'
+    mustRunAfter ':jokesBackend:appengineRun'
+    dependsOn ':app:connectedAndroidTest'
+    finalizedBy 'jokesBackend:appengineStop'
+}

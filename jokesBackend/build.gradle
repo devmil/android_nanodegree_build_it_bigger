@@ -29,6 +29,10 @@ dependencies {
     compile project(':jokesLib')
 }
 
+appengineRun {
+    daemon = true
+}
+
 appengine {
     downloadSdk = true
     appcfg {
