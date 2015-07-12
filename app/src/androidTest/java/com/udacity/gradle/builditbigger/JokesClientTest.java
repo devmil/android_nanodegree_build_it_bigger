@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class JokesClientTest extends AndroidTestCase {
 
     public void testJokeRequest() throws InterruptedException {
-        JokesClient client = new JokesClient();
+        JokesClient client = new JokesClient(getContext());
 
         final String[] responseTitle = new String[1];
         final String[] responseContent = new String[1];
@@ -22,6 +22,14 @@ public class JokesClientTest extends AndroidTestCase {
                 responseTitle[0] = response.getTitle();
                 responseContent[0] = response.getContent();
                 signal.countDown();
+            }
+
+            @Override
+            public void onStateChanged(@States int oldState, @States int newState) {
+            }
+
+            @Override
+            public void onErrorStateChanged(@ErrorCodes int errorState) {
             }
         };
         client.setListener(listener);

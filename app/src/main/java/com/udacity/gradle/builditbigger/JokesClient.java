@@ -1,5 +1,8 @@
 package com.udacity.gradle.builditbigger;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -19,7 +22,13 @@ public class JokesClient {
 
     private MyApi mApi;
     private WeakReference<JokesClientListener> mListenerRef;
-    private boolean mRequesting = false;
+    private WeakReference<Context> mContextRef;
+    private @JokesClientListener.States int mState = JokesClientListener.STATE_IDLE;
+    private @JokesClientListener.ErrorCodes int mLastErrorCode = JokesClientListener.ERROR_NO_ERROR;
+
+    public JokesClient(Context context) {
+        mContextRef = new WeakReference<>(context);
+    }
 
     synchronized private MyApi getApi() {
         if(mApi == null) {
@@ -48,32 +57,84 @@ public class JokesClient {
     }
 
     public void requestNewJoke() {
-        if(mRequesting) {
+        if(mState != JokesClientListener.STATE_IDLE) {
             return;
         }
-        mRequesting = true;
+        if(!checkConnectionAvailable()) {
+            setError(JokesClientListener.ERROR_CONNECTION);
+            return;
+        }
+        setState(JokesClientListener.STATE_FETCHING);
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
+                setError(JokesClientListener.ERROR_NO_ERROR);
                 MyApi api = getApi();
                 try {
                     JokeBean rndJoke = api.getRandomJoke().execute();
 
-                    JokesClientListener l = mListenerRef.get();
-
-                    if(l != null) {
-                        l.onNewJokeReceived(new JokesClientResponse(rndJoke.getTitle(), rndJoke.getContent()));
-                    }
+                    onNewJokeReceived(new JokesClientResponse(rndJoke.getTitle(), rndJoke.getContent()));
                 }
                 catch(IOException e) {
                     Log.e(TAG, "Error getting Jokes data", e);
+                    setError(JokesClientListener.ERROR_BAD_FORMAT);
                 }
                 finally {
-                    mRequesting = false;
+                    setState(JokesClientListener.STATE_IDLE);
                 }
                 return null;
             }
         }.execute();
+    }
+
+    private boolean checkConnectionAvailable() {
+        Context context = mContextRef.get();
+        if(context == null) {
+            return false;
+        }
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo nInfo = cm.getActiveNetworkInfo();
+        return nInfo != null
+                && nInfo.isAvailable()
+                && nInfo.isConnected();
+    }
+
+    private void setState(@JokesClientListener.States int newState) {
+        if(mState == newState) {
+            return;
+        }
+        @JokesClientListener.States int oldState = mState;
+        mState = newState;
+        onStateChanged(oldState, newState);
+    }
+
+    private void setError(@JokesClientListener.ErrorCodes int errorCode) {
+        if(mLastErrorCode == errorCode) {
+            return;
+        }
+        mLastErrorCode = errorCode;
+        onErrorStateChanged(errorCode);
+    }
+
+    private void onNewJokeReceived(JokesClientResponse jokesResponse) {
+        JokesClientListener l = mListenerRef.get();
+        if(l != null) {
+            l.onNewJokeReceived(jokesResponse);
+        }
+    }
+
+    private void onStateChanged(@JokesClientListener.States int oldState, @JokesClientListener.States int newState) {
+        JokesClientListener l = mListenerRef.get();
+        if(l != null) {
+            l.onStateChanged(oldState, newState);
+        }
+    }
+
+    private void onErrorStateChanged(@JokesClientListener.ErrorCodes int errorCode) {
+        JokesClientListener l = mListenerRef.get();
+        if(l != null) {
+            l.onErrorStateChanged(errorCode);
+        }
     }
 }
