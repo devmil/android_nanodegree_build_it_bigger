@@ -23,5 +23,5 @@ task testWithAppEngine {
     dependsOn ':jokesBackend:appengineRun'
     mustRunAfter ':jokesBackend:appengineRun'
     dependsOn ':app:connectedAndroidTest'
-    finalizedBy 'jokesBackend:appengineStop'
+    finalizedBy ':jokesBackend:appengineStop'
 }
